@@ -1,0 +1,8 @@
+# Aquí se encuentran las librerías que fueron ocupadas para que el proyecto funcione.
+
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import streamlit as st
