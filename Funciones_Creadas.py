@@ -12,7 +12,7 @@ import datetime as dt
 #Funcion para descargar los datos de las acciones.
 def descargar_datos(ticker, start_date, end_date):
     """
-    'Esta función descarga los datos de las acciones de Yahoo Finance.'
+    Esta función descarga los datos de las acciones de Yahoo Finance.
 
     Args:
         ticker (String): Es el nombre clave del activo financiero al que se analizará, por ejemplo: "MSFT" Microsoft
@@ -23,7 +23,16 @@ def descargar_datos(ticker, start_date, end_date):
         dataframe de pandas:Los datos que se descargarón de Yahoo Finance del activo financiero.
     """
     data = yf.download(ticker, start = start_date , end = end_date)
+    print(data.to_string())
     return data
 
+def rendimientos(data):
+    """
+    Función que se encarga de calcular los rendimientos del activo financiero
+    Args:
+        df (_type_): _description_
+    """
+    
+    return data.pct_change().dropna()
 
 
