@@ -17,12 +17,10 @@ import plotly.graph_objects as go
 from datetime import datetime
 from scipy import stats
 from scipy.stats import norm, t, kurtosis, skew
-import warnings
-warnings.filterwarnings('ignore')
+#import warnings
+#warnings.filterwarnings('ignore')
 
-# ============================================
-# FUNCIÓN AUXILIAR PARA EXTRAER VALORES
-# ============================================
+#Función auxiliar para la extracción de las series
 def extract_value(data):
     """
     Extrae un valor numérico de Series/DataFrame/array
@@ -44,9 +42,8 @@ def extract_value(data):
         return extract_value(data.iloc[0])
     return 0
 
-# ============================================
-# FUNCIONES DE CÁLCULO
-# ============================================
+
+# FUNCIONES DE CÁLCULO (Todo lo del proyecto)
 def descargar_datos(ticker, start_date, end_date):
     """Descarga datos de Yahoo Finance"""
     data = yf.download(ticker, start=start_date, end=end_date)
@@ -138,18 +135,15 @@ def monte_carlo_var_es(rendimientos, n_simulaciones=10000):
 # ============================================
 st.set_page_config(
     page_title="Análisis de Riesgo - Paladio",
-    page_icon="📈",
     layout="wide"
 )
 
-st.title("📊 Análisis de Riesgo del Paladio (PA=F)")
+st.title(" Análisis de Riesgo del Paladio (PA=F)")
 st.markdown("---")
 
-# ============================================
-# SIDEBAR
-# ============================================
+# Sidebar (Barrita de al lado)
 with st.sidebar:
-    st.header("⚙️ Configuración")
+    st.header(" Configuración")
     
     ticker = st.text_input("Símbolo del activo", value="PA=F")
     
@@ -162,11 +156,9 @@ with st.sidebar:
     window = st.number_input("Ventana rolling (días)", min_value=50, max_value=500, value=252)
     
     st.markdown("---")
-    load_data = st.button("🔄 Cargar Datos", type="primary", use_container_width=True)
+    load_data = st.button("Cargar Datos", type="primary", use_container_width=True)
 
-# ============================================
-# CARGA DE DATOS
-# ============================================
+# Cargamos los datos
 @st.cache_data
 def cargar_datos(ticker, start, end):
     try:
@@ -184,18 +176,17 @@ if load_data or 'data' not in st.session_state:
         if data is not None:
             st.session_state.data = data
             st.session_state.retornos = calcular_rendimientos(data)
-            st.success(f"✅ Datos cargados: {len(st.session_state.retornos)} días")
+            st.success(f"Datos cargados: {len(st.session_state.retornos)} días")
             st.session_state.datos_cargados = True
 
-# ============================================
-# CONTENIDO PRINCIPAL
-# ============================================
+
+# Main Menu
 if st.session_state.get('datos_cargados', False):
     retornos = st.session_state.retornos
     data = st.session_state.data
     
     # Métricas
-    st.subheader("📈 Resumen del Activo")
+    st.subheader("Resumen del Activo")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -216,17 +207,17 @@ if st.session_state.get('datos_cargados', False):
     
     # Tabs
     tabs = st.tabs([
-        "📊 Rendimientos",
-        "📉 VaR y ES Estático",
-        "🔄 Rolling Window",
-        "⚠️ Violaciones",
-        "🎲 Monte Carlo",
-        "📉 Volatilidad Móvil"
+        " Rendimientos",
+        " VaR y ES Estático",
+        " Rolling Window",
+        " Violaciones",
+        " Monte Carlo",
+        " Volatilidad Móvil"
     ])
     
-    # ========================================
-    # TAB 1: RENDIMIENTOS
-    # ========================================
+    
+    # Apartado 1: RENDIMIENTOS
+    
     with tabs[0]:
         st.header("Análisis de Rendimientos")
         
@@ -265,22 +256,20 @@ if st.session_state.get('datos_cargados', False):
             st.metric("Sesgo", f"{s:.4f}")
         
         # Interpretación
-        st.subheader("📖 Interpretación")
+        st.subheader(" Interpretación")
         if k > 3:
-            st.info("📌 **Curtosis leptocúrtica**: Distribución con colas pesadas. Los eventos extremos son más probables que en una distribución normal.")
+            st.info(" **Curtosis leptocúrtica**: Distribución con colas pesadas. Los eventos extremos son más probables que en una distribución normal.")
         elif k < 3:
-            st.info("📌 **Curtosis platicúrtica**: Distribución con colas ligeras.")
+            st.info(" **Curtosis platicúrtica**: Distribución con colas ligeras.")
         else:
-            st.info("📌 **Curtosis mesocúrtica**: Similar a distribución normal.")
+            st.info(" **Curtosis mesocúrtica**: Similar a distribución normal.")
         
         if s > 0:
-            st.info("📌 **Sesgo positivo**: Cola derecha más larga (rendimientos positivos extremos).")
+            st.info(" **Sesgo positivo**: Cola derecha más larga (rendimientos positivos extremos).")
         elif s < 0:
-            st.info("📌 **Sesgo negativo**: Cola izquierda más larga (pérdidas extremas).")
+            st.info(" **Sesgo negativo**: Cola izquierda más larga (pérdidas extremas).")
     
-    # ========================================
-    # TAB 2: VAR Y ES ESTÁTICO
-    # ========================================
+    # Apartado 2: VAR y ES estatico
     with tabs[1]:
         st.header("VaR y ES - Método Estático")
         
@@ -333,16 +322,14 @@ if st.session_state.get('datos_cargados', False):
         ax.grid(True, alpha=0.3)
         st.pyplot(fig)
     
-    # ========================================
-    # TAB 3: ROLLING WINDOW
-    # ========================================
+    # Apartado 3
     with tabs[2]:
         st.header("Rolling VaR y ES - Método Histórico")
         
         with st.spinner("Calculando rolling statistics..."):
             resultados_roll = rolling_VaR_historico(retornos, window=window)
         
-        st.write(f"📊 **Total de predicciones:** {len(resultados_roll)}")
+        st.write(f"**Total de predicciones:** {len(resultados_roll)}")
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=resultados_roll['Fecha'], y=resultados_roll['Retorno_Real'],
@@ -362,9 +349,7 @@ if st.session_state.get('datos_cargados', False):
         st.subheader("Últimas 10 predicciones")
         st.dataframe(resultados_roll.tail(10).round(2), use_container_width=True)
     
-    # ========================================
-    # TAB 4: VIOLACIONES
-    # ========================================
+    # Apartado 4: VIOLACIONES
     with tabs[3]:
         st.header("Análisis de Violaciones del VaR")
         
@@ -380,20 +365,20 @@ if st.session_state.get('datos_cargados', False):
         with col1:
             st.metric("Violaciones VaR 95%", viol_95, delta=f"{pct_95:.2f}% (Esperado: 5%)")
             if abs(pct_95 - 5) <= 0.5:
-                st.success("✅ Evaluación: Excelente")
+                st.success("Evaluación: Excelente")
             elif abs(pct_95 - 5) <= 1:
-                st.warning("⚠️ Evaluación: Aceptable")
+                st.warning("Evaluación: Aceptable")
             else:
-                st.error("❌ Evaluación: Deficiente")
+                st.error("Evaluación: Deficiente")
         
         with col2:
             st.metric("Violaciones VaR 99%", viol_99, delta=f"{pct_99:.2f}% (Esperado: 1%)")
             if abs(pct_99 - 1) <= 0.2:
-                st.success("✅ Evaluación: Excelente")
+                st.success("Evaluación: Excelente")
             elif abs(pct_99 - 1) <= 0.5:
-                st.warning("⚠️ Evaluación: Aceptable")
+                st.warning("Evaluación: Aceptable")
             else:
-                st.error("❌ Evaluación: Deficiente")
+                st.error("Evaluación: Deficiente")
         
         fig, axes = plt.subplots(2, 1, figsize=(12, 8))
         
@@ -416,9 +401,8 @@ if st.session_state.get('datos_cargados', False):
         plt.tight_layout()
         st.pyplot(fig)
     
-    # ========================================
-    # TAB 5: MONTE CARLO
-    # ========================================
+
+    # Apartado de las Simulaciones MONTE CARLO
     with tabs[4]:
         st.header("Simulación Monte Carlo")
         
@@ -451,9 +435,8 @@ if st.session_state.get('datos_cargados', False):
         plt.tight_layout()
         st.pyplot(fig)
     
-    # ========================================
-    # TAB 6: VOLATILIDAD MÓVIL
-    # ========================================
+
+    # Apartado 6 VOLATILIDAD MÓVIL
     with tabs[5]:
         st.header("VaR con Volatilidad Móvil")
         st.markdown("**Fórmula:** $VaR(1-\\alpha) = q_\\alpha \\times \\sigma_{252,t}$")
