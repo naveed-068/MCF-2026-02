@@ -198,9 +198,9 @@ if st.session_state.get('datos_cargados', False):
         ret_mean = extract_value(retornos.mean())
         st.metric("Rendimiento Promedio", f"{ret_mean:.4f}%")
     
-    with col3:
-        ret_std = extract_value(retornos.std())
-        st.metric("Volatilidad", f"{ret_std:.4f}%")
+    #with col3:
+        #ret_std = extract_value(retornos.std())
+       #st.metric("Volatilidad", f"{ret_std:.4f}%")
     
     with col4:
         st.metric("Datos Históricos", f"{len(retornos)} días")
@@ -248,7 +248,7 @@ if st.session_state.get('datos_cargados', False):
             st.metric("Media", f"{media_val:.4f}%")
             st.metric("Mediana", f"{mediana_val:.4f}%")
         with col_b:
-            st.metric("Desviación Estándar", f"{std_val:.4f}%")
+            st.metric("Varianza", f"{std_val:.4f}%")
             st.metric("Máximo", f"{max_val:.4f}%")
         with col_c:
             st.metric("Mínimo", f"{min_val:.4f}%")
@@ -269,9 +269,9 @@ if st.session_state.get('datos_cargados', False):
         elif s < 0:
             st.info(" **Sesgo negativo**: Cola izquierda más larga (pérdidas extremas).")
     
-    # Apartado 2: VAR y ES estatico
+    # Apartado 2: VAR y ES
     with tabs[1]:
-        st.header("VaR y ES - Método Estático")
+        st.header("VaR y ES ")
         
         metodo = st.selectbox("Selecciona el método", 
                               ["Histórico", "Normal (Paramétrico)", "t-Student (Paramétrico)"])
