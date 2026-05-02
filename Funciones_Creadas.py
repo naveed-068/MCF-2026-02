@@ -135,3 +135,144 @@ def Expected_Shortfall_normal(alpha, mu, sigma):
       z_alpha = stats.norm.ppf(alpha)  # Esto es el VaR
       ES = mu - sigma * (stats.norm.pdf(z_alpha) / alpha) 
       return ES
+
+"""
+def Rolling_Window_Recursive(retornos, i, Serie_T, window, alpha):
+    
+    Esta función me  va a permitir poder predecir los valores que tomara la
+    medida de riesgo al día i
+
+    Args:
+        i (int): Días de los cuales quieres hacer la predicción
+        Serie_T (Dataframe): Serie de Tiempo de donde se hará la predicción.
+    input("Dime cuantos días más quisieras la predicción")
+    j = +1
+    
+"""
+
+def calcular_VaR_ES_historico(ventana):
+    """
+    Funcion que me va a ayudar a calcular el VaR y ES historicos
+
+    Args:
+        ventana (float):La ventana de días con la que se hae el Rollin Window
+
+    Returns:
+        Float: Regresa el VaR al 95, 99 y ES95 Y ES99
+    """
+    var_95 = np.percentile(ventana, 5)
+    var_99 = np.percentile(ventana, 1)
+    es_95 = ventana[ventana <= var_95].mean()
+    es_99 = ventana[ventana <= var_99].mean()
+    return var_95, var_99, es_95, es_99
+
+def tabla_violaciones(df, nombre_metodo):
+    """Calcula y muestra las violaciones para un método"""
+    total = len(df)
+    
+    violaciones = {
+        'Métrica': ['VaR 95%', 'VaR 99%', 'ES 95%', 'ES 99%'],
+        'Violaciones': [
+            df['Violacion_VaR_95'].sum(),
+            df['Violacion_VaR_99'].sum(),
+            df['Violacion_ES_95'].sum(),
+            df['Violacion_ES_99'].sum()
+        ],
+        'Porcentaje (%)': [
+            df['Violacion_VaR_95'].sum() / total * 100,
+            df['Violacion_VaR_99'].sum() / total * 100,
+            df['Violacion_ES_95'].sum() / total * 100,
+            df['Violacion_ES_99'].sum() / total * 100
+        ],
+        'Esperado (%)': [5, 1, 5, 1]
+    }
+    
+    return pd.DataFrame(violaciones)
+def Expected_Shortfall_normal(alpha, mu, sigma):
+    """
+    Función para calcular el Expected Shortfall de una normal
+    """
+    from scipy import stats
+    z_alpha = stats.norm.ppf(alpha)
+    ES = mu - sigma * (stats.norm.pdf(z_alpha) / alpha)
+    return ES
+
+def Expected_Shortfall_tstudent(alpha, df, loc, scale):
+    """
+    Función para calcular el Expected Shortfall de una t-student
+    """
+    from scipy.stats import t
+    t_alpha = t.ppf(alpha, df)
+    pdf_t_alpha = t.pdf(t_alpha, df)
+    ES_std = -pdf_t_alpha / alpha * ((df + t_alpha**2) / (df - 1))
+    ES = loc + scale * ES_std
+    return ES
+
+def rolling_VaR_historico(retornos, window=252):
+    """
+    Calcula rolling VaR histórico
+    """
+    resultados = []
+    for i in range(window, len(retornos)):
+        ventana = retornos.iloc[i-window:i]
+        var_95 = np.percentile(ventana, 5)
+        var_99 = np.percentile(ventana, 1)
+        es_95 = ventana[ventana <= var_95].mean()
+        es_99 = ventana[ventana <= var_99].mean()
+        
+        resultados.append({
+            'Fecha': retornos.index[i],
+            'Retorno_Real': retornos.iloc[i],
+            'VaR_95%': var_95,
+            'VaR_99%': var_99,
+            'ES_95%': es_95,
+            'ES_99%': es_99
+        })
+    return pd.DataFrame(resultados)
+
+def VaR_volatilidad_movil(retornos, window=252):
+    """
+    VaR con volatilidad móvil
+    """
+    from scipy.stats import norm
+    q_95 = norm.ppf(0.95)
+    q_99 = norm.ppf(0.99)
+    volatilidad = retornos.rolling(window=window).std()
+    VaR_95 = -q_95 * volatilidad.shift(1)
+    VaR_99 = -q_99 * volatilidad.shift(1)
+    
+    resultados = pd.DataFrame({
+        'Fecha': retornos.index,
+        'Retorno_Real': retornos,
+        'VaR_95%': VaR_95,
+        'VaR_99%': VaR_99
+    })
+    return resultados.dropna()
+
+def monte_carlo_var_es(rendimientos, n_simulaciones=10000):
+    """
+    Simulación Monte Carlo
+    """
+    from scipy.stats import norm, t
+    mu = rendimientos.mean()
+    sigma = rendimientos.std()
+    df, loc, scale = t.fit(rendimientos)
+    
+    sim_norm = np.random.normal(mu, sigma, n_simulaciones)
+    sim_t = t.rvs(df, loc, scale, n_simulaciones)
+    
+    resultados = []
+    for alpha in [0.05, 0.025, 0.01]:
+        var_norm = np.percentile(sim_norm, alpha * 100)
+        es_norm = sim_norm[sim_norm <= var_norm].mean()
+        var_t = np.percentile(sim_t, alpha * 100)
+        es_t = sim_t[sim_t <= var_t].mean()
+        
+        resultados.append({
+            'Confianza': f"{(1-alpha)*100}%",
+            'VaR_Normal': var_norm,
+            'ES_Normal': es_norm,
+            'VaR_TStudent': var_t,
+            'ES_TStudent': es_t
+        })
+    return pd.DataFrame(resultados)
