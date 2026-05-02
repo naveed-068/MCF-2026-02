@@ -6,3 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
+import Funciones_Creadas as fc
+import scipy.stats
+from scipy.stats import kurtosis, skew, shapiro, norm, t
+import plotly.graph_objects as go
