@@ -1,9 +1,8 @@
 yfinance
 pandas
 numpy 
-matplotlib.pyplot
+matplotlib
 seaborn 
 streamlit 
-Funciones_Creadas
-scipy.stats
-plotly.graph_objects
+scipy
+plotly
